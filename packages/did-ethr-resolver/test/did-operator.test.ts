@@ -1,3 +1,4 @@
+/* eslint-disable func-names */
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { assert, expect } from 'chai';
 import { Keys } from '@ew-did-registry/keys';
@@ -17,6 +18,7 @@ import {
   Operator, signerFromKeys, ethrReg, getProvider, walletPubKey, withProvider, withKey,
 } from '../src';
 import { deployRegistry } from '../../../tests/init-ganache';
+import { serviceTestSuite } from './did-operator-services.test';
 
 const { fail } = assert;
 
@@ -124,25 +126,6 @@ const testSuite = (): void => {
     });
   });
 
-  it('service endpoint update should add an entry in service section of the DID document', async () => {
-    const attribute = DIDAttribute.ServicePoint;
-    const endpoint = 'https://test.algo.com';
-    const serviceId = 'UserClaimURL1';
-    const updateData: IUpdateData = {
-      type: attribute,
-      value: {
-        id: `${did}#service-${serviceId}`,
-        type: 'ClaimStore',
-        serviceEndpoint: endpoint,
-      },
-    };
-    await operator.update(did, attribute, updateData, validity);
-    const document = await operator.read(did);
-    expect(document.id).equal(did);
-    expect(document.service.find(
-      (sv: { serviceEndpoint: string }) => sv.serviceEndpoint === endpoint,
-    )).not.undefined;
-  });
 
   it('setting attribute on invalid did should throw an error', async () => {
     const invalidDid = `did:${identity}`;
@@ -340,15 +323,19 @@ const testSuite = (): void => {
 describe('[RESOLVER PACKAGE]: DID-OPERATOR', function () {
   this.timeout(0);
 
-  beforeEach(async () => {
+  beforeEach(async function () {
     registry = await deployRegistry([identity, newOwnerKeys.getAddress()]);
     owner = withKey(withProvider(signerFromKeys(keys), getProvider()), walletPubKey);
     operator = new Operator(
       owner,
       { method: Methods.Erc1056, abi: ethrReg.abi, address: registry },
     );
+
     await operator.create();
+
+    Object.assign(this, { operator, did, validity });
   });
 
+  serviceTestSuite();
   testSuite();
 });
