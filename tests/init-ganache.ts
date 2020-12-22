@@ -9,11 +9,7 @@ const web3 = new Web3(`http://localhost:${GANACHE_PORT}`);
 export const deployRegistry = async (fillAccounts: Array<string>): Promise<string> => {
   const accounts = await web3.eth.getAccounts();
 
-  await Promise.all(fillAccounts.map((acc) => web3.eth.sendTransaction({
-    from: accounts[2],
-    to: acc,
-    value: '1000000000000000000',
-  })));
+  await Promise.all(fillAccounts.map((acc) => replenish(acc)));
 
   const provider = new ethers.providers.Web3Provider(web3.currentProvider as AsyncSendable);
   const registryFactory = new ContractFactory(ethrReg.abi, ethrReg.bytecode,
@@ -22,3 +18,12 @@ export const deployRegistry = async (fillAccounts: Array<string>): Promise<strin
   // @TODO: deploy proxy factory
   return registry.address;
 };
+
+export const replenish = async (acc: string) => {
+  const accounts = await web3.eth.getAccounts();
+  await web3.eth.sendTransaction({
+    from: accounts[2],
+    to: acc,
+    value: '1000000000000000000',
+  });
+}

@@ -9,12 +9,9 @@ import {
   IUpdateData,
   PubKeyType,
 } from '@ew-did-registry/did-resolver-interface';
-import { Methods } from '@ew-did-registry/did';
 import {
-  Operator, signerFromKeys, getProvider, walletPubKey, withProvider, withKey,
+  Operator,
 } from '../src';
-
-import { deployRegistry } from '../../../tests/init-ganache';
 
 export function readAttributeTestSuite() {
   describe('Read attribute tests', function () {
@@ -80,9 +77,14 @@ export function readAttributeTestSuite() {
       expect(delegateAttr.publicKey === updateData.delegate);
     });
 
-    it('resolver should read did owner public key', async () => {
+    it('owner public key can be read', async () => {
       await operator.create();
       expect((await operator.readOwnerPubKey(did))).equal(keys.publicKey);
+    });
+    
+    it('public key in deactivated document should be empty', async () => {
+      await operator.deactivate(did);
+      expect((await operator.readOwnerPubKey(did))).undefined;
     });
   });
 }
