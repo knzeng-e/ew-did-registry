@@ -9,7 +9,7 @@ import { Operator, documentFromLogs } from '../src';
 chai.use(equalInAnyOrder);
 
 export function serviceTestSuite() {
-  describe.only('Service test suite', () => {
+  describe('Service test suite', () => {
     const type = DIDAttribute.ServicePoint;
     let operator: Operator;
     let did: string;
@@ -59,6 +59,29 @@ export function serviceTestSuite() {
       const document = await operator.read(did);
       expect(document).be.deep.equalInAnyOrder(documentFromLogs(did, [log1, log2]));
       expect(document.service.length).eq(2);
+    });
+
+    it('deactivation of the document should revoke services', async () => {
+      expect((await operator.read(did)).service.length).equal(0);
+
+      let value = {
+        id: `${did}#service-${1}`,
+        type: 'ClaimStore',
+        serviceEndpoint: 'http://servic1.com',
+      };
+
+      await operator.update(did, DIDAttribute.ServicePoint, { type, value }, validity);
+      value = {
+        id: `${did}#service-${2}`,
+        type: 'ClaimStore',
+        serviceEndpoint: 'http://servic2.com',
+      };
+      await operator.update(did, DIDAttribute.ServicePoint, { type, value }, validity);
+      expect((await operator.read(did)).service.length).equal(2);
+
+      await operator.deactivate(did);
+
+      expect((await operator.read(did)).service.length).equal(0);
     });
   });
 }
