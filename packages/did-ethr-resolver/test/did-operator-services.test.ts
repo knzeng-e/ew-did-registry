@@ -9,7 +9,7 @@ import { Operator, documentFromLogs } from '../src';
 chai.use(equalInAnyOrder);
 
 export function serviceTestSuite() {
-  describe('Service test suite', () => {
+  describe('Service tests', () => {
     const type = DIDAttribute.ServicePoint;
     let operator: Operator;
     let did: string;

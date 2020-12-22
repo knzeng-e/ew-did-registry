@@ -8,7 +8,7 @@ import { deployRegistry } from '../../../tests/init-ganache';
 chai.should();
 chai.use(chaiAsPromised);
 
-describe('[RESOLVER PACKAGE]', function () {
+describe('Resolver tests', function () {
   this.timeout(60000);
   let resolver: IResolver;
   let registry: string;
